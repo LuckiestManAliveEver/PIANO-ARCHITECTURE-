@@ -1,0 +1,13 @@
+Running ToolBench Evaluation on 50 queries...
+
+=== Evaluation Results ===
+Routing Accuracy (Exact Match): 84.00%
+Missed Activation Rate: 6.00%
+False Activation Rate: 10.00%
+
+=== Confusion Matrix (Primary Prediction) ===
+True/Pred  | K1    K2    K3    None 
+-----------------------------------
+K1         | 18    0     0     2     
+K2         | 3     14    0     0     
+K3         | 2     0     10    1     

@@ -1,0 +1,6 @@
+{
+  "tokens_in": 53,
+  "kv_cache_mb": 26.5,
+  "ttft_ms": 0.01,
+  "pass_at_1": 1.0
+}

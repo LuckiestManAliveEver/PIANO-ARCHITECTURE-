@@ -1,0 +1,10 @@
+{
+  "baseline_kv_mb": 26.5,
+  "baseline_ttft_ms": 0.01,
+  "kv_reduction_pct": 83.47169811320755,
+  "piano_kv_mb": 4.38,
+  "piano_ttft_ms": 0.0,
+  "routing_accuracy_pct": 84.0,
+  "token_savings_max_pct": 96.53,
+  "token_savings_min_pct": 68.18
+}

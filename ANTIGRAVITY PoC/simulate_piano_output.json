@@ -1,0 +1,8 @@
+{
+  "detected_intents": ["math_reasoning", "verification", "formatting"],
+  "activating_keys": ["K1", "K2", "K3"],
+  "tokens_in": 50,
+  "kv_cache_mb": 4.38,
+  "ttft_ms": 0.0,
+  "pass_at_1": 1.0
+}

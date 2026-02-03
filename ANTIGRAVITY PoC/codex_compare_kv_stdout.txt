@@ -1,0 +1,15 @@
+Initializing Anti-Gravity Benchmark Environment...
+Anti-Gravity Environment Initialized on TPU_v5e_SIM
+
+Running Benchmark with Prompt Length: 20, Generation: 50 tokens
+
+============================================================
+METRIC                    | STANDARD TRANSFORMER | PIANO ARCHITECTURE  
+============================================================
+KV-Cache Shape            | [32, 32, 70, 128]    | [32, 8, 70, 64]     
+Est. Memory (MB)          | 35.00                | 4.38                
+TTFT (ms)                 | 0.01                 | 0.01                
+Savings (Memory)          | -                    | 87.5%
+------------------------------------------------------------
+
+Report saved to comparison_report.md

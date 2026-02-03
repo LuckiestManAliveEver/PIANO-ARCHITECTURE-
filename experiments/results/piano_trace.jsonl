@@ -1,0 +1,36 @@
+{"event": "task_start", "task_id": "demo-ecom", "ts": 1769998256.9455872}
+{"event": "step_route", "task_id": "demo-ecom", "step_id": 0, "primary": ["search_catalog", "refund_policy"], "warm": [], "confidence": 1.0, "scores": [["search_catalog", 1.0], ["refund_policy", -5.0]]}
+{"event": "step_result", "task_id": "demo-ecom", "step_id": 0, "ok": true, "used": ["search_catalog", "refund_policy"], "fallback_used": false, "latency_ms": 2.6098699963768013, "error": null, "combined_keys_count": 2}
+{"event": "step_route", "task_id": "demo-ecom", "step_id": 1, "primary": ["price_quote", "inventory_check", "search_catalog"], "warm": ["order_create", "refund_policy"], "confidence": 0.5, "scores": [["price_quote", 1.0], ["inventory_check", 1.0], ["search_catalog", -5.0], ["order_create", -5.0], ["refund_policy", -5.0]]}
+{"event": "step_result", "task_id": "demo-ecom", "step_id": 1, "ok": true, "used": ["price_quote", "inventory_check", "search_catalog"], "fallback_used": false, "latency_ms": 1.2408469992806204, "error": null, "combined_keys_count": 4}
+{"event": "step_route", "task_id": "demo-ecom", "step_id": 2, "primary": ["inventory_check", "search_catalog", "price_quote"], "warm": ["order_create", "refund_policy"], "confidence": 1.0, "scores": [["inventory_check", 1.0], ["search_catalog", -5.0], ["price_quote", -5.0], ["order_create", -5.0], ["refund_policy", -5.0]]}
+{"event": "step_result", "task_id": "demo-ecom", "step_id": 2, "ok": true, "used": ["inventory_check", "search_catalog", "price_quote"], "fallback_used": false, "latency_ms": 0.8559320049243979, "error": null, "combined_keys_count": 4}
+{"event": "step_route", "task_id": "demo-ecom", "step_id": 3, "primary": ["order_create", "search_catalog", "price_quote"], "warm": ["inventory_check", "refund_policy"], "confidence": 1.0, "scores": [["order_create", 1.0], ["search_catalog", -5.0], ["price_quote", -5.0], ["inventory_check", -5.0], ["refund_policy", -5.0]]}
+{"event": "step_result", "task_id": "demo-ecom", "step_id": 3, "ok": true, "used": ["order_create", "search_catalog", "price_quote"], "fallback_used": false, "latency_ms": 0.5940439950791188, "error": null, "combined_keys_count": 4}
+{"event": "step_route", "task_id": "demo-ecom", "step_id": 4, "primary": ["delivery_eta", "search_catalog", "price_quote"], "warm": ["inventory_check", "order_create"], "confidence": 1.0, "scores": [["delivery_eta", 2.0], ["search_catalog", -5.0], ["price_quote", -5.0], ["inventory_check", -5.0], ["order_create", -5.0]]}
+{"event": "step_result", "task_id": "demo-ecom", "step_id": 4, "ok": true, "used": ["delivery_eta", "search_catalog", "price_quote"], "fallback_used": false, "latency_ms": 1.0757790005300194, "error": null, "combined_keys_count": 3}
+{"event": "task_end", "task_id": "demo-ecom", "ok": true, "latency_ms": 7.855012998334132, "steps_ok_count": 5, "steps_fail_count": 0}
+{"event": "task_start", "task_id": "demo-ecom", "ts": 1769999151.46911}
+{"event": "step_route", "task_id": "demo-ecom", "step_id": 0, "primary": ["search_catalog"], "warm": [], "confidence": 1.0, "scores": [["search_catalog", 1.0]]}
+{"event": "step_result", "task_id": "demo-ecom", "step_id": 0, "ok": true, "used": ["search_catalog"], "fallback_used": false, "latency_ms": 3.0726089971722104, "error": null, "combined_keys_count": 1}
+{"event": "step_route", "task_id": "demo-ecom", "step_id": 1, "primary": ["price_quote", "inventory_check"], "warm": [], "confidence": 0.5, "scores": [["price_quote", 1.0], ["inventory_check", 1.0]]}
+{"event": "step_result", "task_id": "demo-ecom", "step_id": 1, "ok": true, "used": ["price_quote", "inventory_check"], "fallback_used": false, "latency_ms": 1.0075430036522448, "error": null, "combined_keys_count": 3}
+{"event": "step_route", "task_id": "demo-ecom", "step_id": 2, "primary": [], "warm": [], "confidence": 0.0, "scores": []}
+{"event": "step_result", "task_id": "demo-ecom", "step_id": 2, "ok": false, "used": [], "fallback_used": true, "latency_ms": 0.0285400019492954, "error": "missing_required:in_stock", "combined_keys_count": 0}
+{"event": "step_route", "task_id": "demo-ecom", "step_id": 3, "primary": ["order_create"], "warm": [], "confidence": 1.0, "scores": [["order_create", 1.0]]}
+{"event": "step_result", "task_id": "demo-ecom", "step_id": 3, "ok": true, "used": ["order_create"], "fallback_used": false, "latency_ms": 0.43612500303424895, "error": null, "combined_keys_count": 2}
+{"event": "step_route", "task_id": "demo-ecom", "step_id": 4, "primary": ["delivery_eta"], "warm": [], "confidence": 1.0, "scores": [["delivery_eta", 2.0]]}
+{"event": "step_result", "task_id": "demo-ecom", "step_id": 4, "ok": true, "used": ["delivery_eta"], "fallback_used": false, "latency_ms": 0.3776950034080073, "error": null, "combined_keys_count": 1}
+{"event": "task_end", "task_id": "demo-ecom", "ok": false, "latency_ms": 6.424074999813456, "steps_ok_count": 4, "steps_fail_count": 1}
+{"event": "task_start", "task_id": "demo-ecom", "ts": 1769999333.6229148}
+{"event": "step_route", "task_id": "demo-ecom", "step_id": 0, "primary": ["search_catalog"], "warm": [], "confidence": 1.0, "scores": [["search_catalog", 1.0]]}
+{"event": "step_result", "task_id": "demo-ecom", "step_id": 0, "ok": true, "used": ["search_catalog"], "fallback_used": false, "latency_ms": 2.341393003007397, "error": null, "combined_keys_count": 1}
+{"event": "step_route", "task_id": "demo-ecom", "step_id": 1, "primary": ["price_quote", "inventory_check"], "warm": [], "confidence": 0.5, "scores": [["price_quote", 1.0], ["inventory_check", 1.0]]}
+{"event": "step_result", "task_id": "demo-ecom", "step_id": 1, "ok": true, "used": ["price_quote", "inventory_check"], "fallback_used": false, "latency_ms": 0.8276259977719747, "error": null, "combined_keys_count": 3}
+{"event": "step_route", "task_id": "demo-ecom", "step_id": 2, "primary": [], "warm": [], "confidence": 0.0, "scores": []}
+{"event": "step_result", "task_id": "demo-ecom", "step_id": 2, "ok": true, "used": [], "fallback_used": false, "latency_ms": 0.008948001777753234, "error": null, "combined_keys_count": 0}
+{"event": "step_route", "task_id": "demo-ecom", "step_id": 3, "primary": ["order_create"], "warm": [], "confidence": 1.0, "scores": [["order_create", 1.0]]}
+{"event": "step_result", "task_id": "demo-ecom", "step_id": 3, "ok": true, "used": ["order_create"], "fallback_used": false, "latency_ms": 0.3952109982492402, "error": null, "combined_keys_count": 2}
+{"event": "step_route", "task_id": "demo-ecom", "step_id": 4, "primary": ["delivery_eta"], "warm": [], "confidence": 1.0, "scores": [["delivery_eta", 2.0]]}
+{"event": "step_result", "task_id": "demo-ecom", "step_id": 4, "ok": true, "used": ["delivery_eta"], "fallback_used": false, "latency_ms": 0.3848739943350665, "error": null, "combined_keys_count": 1}
+{"event": "task_end", "task_id": "demo-ecom", "ok": true, "latency_ms": 5.005151004297659, "steps_ok_count": 5, "steps_fail_count": 0}

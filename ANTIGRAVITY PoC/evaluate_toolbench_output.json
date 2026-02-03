@@ -1,0 +1,13 @@
+{
+  "routing_accuracy_exact_match_percent": 84.0,
+  "missed_activation_rate_percent": 6.0,
+  "false_activation_rate_percent": 10.0,
+  "confusion_matrix": {
+    "labels": ["K1", "K2", "K3", "None"],
+    "rows": [
+      [18, 0, 0, 2],
+      [3, 14, 0, 0],
+      [2, 0, 10, 1]
+    ]
+  }
+}

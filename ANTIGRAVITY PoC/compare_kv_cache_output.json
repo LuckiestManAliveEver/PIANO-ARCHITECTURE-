@@ -1,0 +1,9 @@
+{
+  "kv_cache_shape_standard": [32, 32, 70, 128],
+  "kv_cache_shape_piano": [32, 8, 70, 64],
+  "est_memory_mb_standard": 35.00,
+  "est_memory_mb_piano": 4.38,
+  "ttft_ms_standard": 0.01,
+  "ttft_ms_piano": 0.01,
+  "memory_savings_percent": 87.5
+}

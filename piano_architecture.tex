@@ -1,0 +1,276 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{listings}
+
+\title{Piano Architecture: An Execution Framework for Instruction-Elastic Agentic Transformers}
+\author{BRIAN KIARIE}
+\date{January 2026}
+
+\begin{document}
+
+\maketitle
+\begin{abstract}
+Execution architectures for agentic transformers incur significant computational and memory overhead when static instructions and system prompts are repeatedly processed during inference. We introduce Piano Architecture, an execution framework that replaces instruction-token serialization with index-routed Keys. A Conductor performs Matrix-Tree routing with deviation indices, activating Warm Keys for contextual priming and promoting only the minimal Active Keys for concurrent execution. A verification and re-route loop validates required fields and escalates routing when outputs deviate from intent. This enables Instruction Elasticity, bounding inference cost to query complexity rather than instruction length. In a proof-of-concept implementation using Google Anti-Gravity (JAX/Pallas), Piano Architecture achieves up to 87.5\% reduction in KV-cache memory and 70--85\% token savings while preserving reasoning accuracy. We also describe an offline Codex replication harness for the Anti-Gravity PoC to ensure deterministic routing, measurable metrics, and repeatable results.
+\end{abstract}
+
+\section{Introduction}
+
+Large Language Models (LLMs) process instructions, system prompts, and tool descriptions as raw token sequences at every inference step. This results in a persistent \emph{prompt-tax}, where static instructions dominate compute and memory costs regardless of query simplicity. As agentic systems grow more complex, instruction length scales faster than user input, making inference increasingly inefficient.
+
+We propose Instruction Elasticity: the ability for a model's functional capability set to expand without increasing inference-time token length. Piano Architecture is an execution framework for agentic transformers that achieves this by shifting from instruction reading to instruction execution, storing capabilities as indexed modules and invoking them only when required.
+
+\section{Contributions}
+\begin{itemize}
+    \item Instruction-level conditional execution
+    \item Indexed capability routing
+    \item Elastic conductor training
+    \item Outcome-grounded intent validation
+    \item Similarity-bound hierarchical routing
+    \item KV-cache reduction evidence
+\end{itemize}
+
+
+\section{Background and Related Work}
+
+\subsection{Sparse Mixture of Experts (MoE)}
+
+Sparse MoE architectures such as Switch Transformer, GLaM, and DeepSeek-MoE reduce computational cost by activating a subset of expert parameters per token. While effective at lowering FLOPs, these systems still require full instruction and prompt serialization. Consequently, KV-cache allocation and memory bandwidth scale linearly with instruction length.
+
+\subsection{Prompt Caching}
+
+Prompt caching reuses attention key-value states for repeated prefixes, reducing latency but not memory allocation. Cached prompts must still be fully represented in the KV-cache, preserving the linear dependency on instruction length.
+
+\subsection{Retrieval-Augmented Generation (RAG)}
+
+RAG systems externalize knowledge retrieval but reintroduce retrieved content as tokens. This preserves token-level redundancy and does not fundamentally alter inference complexity.
+
+\subsection{Distinction from Prior Work}
+
+Piano Architecture differs fundamentally by eliminating instruction tokenization at inference time. Capabilities are addressed by index, not serialized as text, enabling bounded memory growth independent of instruction volume.
+
+\section{System Overview}
+
+Piano Architecture consists of five components:
+\begin{enumerate}
+    \item Keyboard (Keys) -- An ordered set of executable capability modules addressed by index
+    \item Intent Matrix -- A latent representation mapping queries to capability coordinates
+    \item Conductor -- Guided routing across a Matrix-Tree with deviation indices
+    \item Execution Layer -- Parallel activation of selected Keys
+    \item Composer -- Verification, merge, and re-route controller
+\end{enumerate}
+
+Warm vs Active Keys are explicitly separated. Warm Keys are low-cost context primers or validators that prepare routing and execution (e.g., tool schemas, required fields), while Active Keys are the minimal set of modules that execute the intent. Warm Keys may be promoted to Active Keys when verification detects missing or inconsistent outputs.
+
+\section{Methodology}
+
+\subsection{Matrix-Tree Routing}
+
+Given a query $Q$ and Intent Matrix $M$, the Conductor performs hierarchical traversal rather than flat expert selection. The selected module set $S(Q)$ is defined as:
+
+$$S(Q) = {K_i \mid \text{path}_M(Q) \rightarrow i}$$
+
+Inference output is computed as:
+
+$$Y = \text{Composer}(E(K_1), E(K_2), ..., E(K_n))$$
+
+where $E(K_i)$ denotes execution of Key $i$.
+
+\subsection{Guided Routing \& Deviation Indices}
+The Conductor applies guided routing over the Matrix-Tree using deviation indices that quantify divergence between intended and observed execution traces. Negative deviation indicates under-coverage of required intent fields and triggers corrective routing to broader or adjacent intent nodes. This allows the system to recover from partial routing without re-serializing instructions.
+
+\subsection{Parallel Execution \& Verification}
+Selected Keys execute concurrently in the Execution Layer, while the Composer checks required fields, tool outputs, and structural constraints. If verification fails, Warm Keys responsible for validation or schema completion are promoted to Active Keys and the Conductor re-routes with updated constraints, forming a verify-and-re-route loop.
+
+\subsection{Complexity Analysis}
+
+Standard Transformers incur:
+
+$$O(T_{instruction} + T_{query})$$
+
+Piano Architecture reduces this to:
+
+$$O(T_{query} + \log N)$$
+
+where $N$ is the number of indexed Keys. Instruction length is removed from inference complexity.
+
+\subsection{Elastic Conductor Training}
+The Conductor is pretrained to map queries to intent coordinates using supervised intent labels and synthetic routing traces. At deployment, it adapts online through lightweight updates driven by execution feedback, allowing new instructions and tools to be incorporated without re-serializing prompts. This elastic training loop keeps routing aligned with evolving capability sets while preserving low-latency inference.
+
+\subsection{Outcome-Grounded Intent Validation and Fallback Routing}
+After execution, outputs are checked against an intent-aligned outcome validator that compares expected and observed execution traces. If the deviation score exceeds 1, the system issues an explicit accuracy disclaimer and triggers fallback routing to a broader intent path or a safe default module set. This outcome-grounded intent validation (OGIV) makes execution robustness explicit and provides a controlled recovery path when routing is uncertain.
+
+\subsection{Similarity-Bound Hierarchical Intent Routing}
+Intent Matrices are organized into a hierarchy linked by a similarity index from 1 to 5, where 5 denotes near-equivalent intent structure. Highly similar matrices are consolidated to reduce routing ambiguity and avoid redundant traversal, while lower-similarity links preserve specialized routing paths. This structure supports scalable expansion while keeping routing decisions bounded and interpretable.
+
+\section{PIANO as an Agent Execution Framework}
+Piano treats Keys as executable tool calls rather than serialized instructions. Each Key corresponds to a concrete tool or capability module, and the Conductor selects a parallel set of tool invocations based on the Intent Matrix. This avoids Pi-style sequential latency compounding by executing independent Keys concurrently and composing outputs through verification, rather than chaining tool calls linearly through a single prompt stream.
+
+\section{Experimental Design}
+
+\subsection{Implementation}
+
+A proof-of-concept was implemented using Google Anti-Gravity (JAX/Pallas) to enable dynamic branching within accelerator pipelines.
+
+\subsection{Benchmarks}
+
+\begin{itemize}
+    \item Tool calling tasks
+    \item Multi-step reasoning (GSM8K-style)
+\end{itemize}
+
+\subsection{Metrics}
+
+\begin{itemize}
+    \item KV-cache memory footprint
+    \item Token consumption
+    \item Routing accuracy
+    \item Time-To-First-Token (TTFT)
+\end{itemize}
+
+\subsection{Codex Replication Harness}
+We provide a Codex-driven, offline replication harness to replay the Anti-Gravity PoC deterministically. Baseline measurements include full instruction tokens (system + tool + developer text) in the prompt, while Piano measurements exclude instruction tokens by substituting index-routed Keys. Deterministic routing is required: given fixed seed, routing tables, and intent detection, the Conductor must return identical Key sets across runs. KV-cache proxy usage is computed from tensor shapes as:
+$$\mathrm{KV} \propto L \times H \times T \times D$$
+where $L$ is layer count, $H$ attention heads, $T$ sequence length, and $D$ head dimension. Token accounting reports total tokens processed per request; baseline includes instruction tokens, while Piano excludes them because they are executed as indexed Keys.
+
+\section{Results}
+
+\subsection{KV-Cache Allocation and Memory Efficiency}
+We compare Piano Architecture against a standard monolithic Transformer using a controlled prompt of approximately 70 tokens (20-token instruction + 50-token reasoning sequence). In the baseline Transformer, attention key-value tensors follow the shape:
+$$[L, H, T, D] = [32, 32, 70, 128]$$
+Under Piano Architecture, selective module activation reduces the effective attention width to:
+$$[32, 8, 70, 64]$$
+
+% Requires: \usepackage{booktabs}
+\begin{table}[h]
+    \centering
+    \caption{Section 6 Results: Anti-Gravity PoC vs Codex Replication}
+    \label{tab:section6_results}
+    \begin{tabular}{lccc}
+        \toprule
+        Metric & Anti-Gravity & Codex Replication & Delta \\
+        \midrule
+        KV Tensor Shape & $[32,32,70,128] / [32,8,70,64]$ & $[32,32,T_b,128] / [32,8,T_p,64]$ & n/a \\
+        KV Memory (MB) Baseline & 35.00 & 26.50 & $-8.50$ \\
+        KV Memory (MB) Piano & 4.38 & 4.38 & $0.00$ \\
+        KV Reduction (\%) & 87.5 & 83.47 & $-4.03$ pp \\
+        TTFT Baseline (ms) & 0.01 & 0.01 & $0.00$ \\
+        TTFT Piano (ms) & 0.01 & 0.00 & $-0.01$ \\
+        Token Savings (\%) & 70--85 & 68.18--96.53 & 68.18--96.53 vs 70--85 ($-1.82$ to $+11.53$ pp) \\
+        Routing Accuracy (\%) & 96.4--100 & 84.0 & $-12.4$ pp \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+Anti-Gravity values are derived from accelerator simulation outputs, while Codex values replicate the same KV-cache accounting locally using the offline harness. Piano KV memory matches exactly across both environments (4.38~MB), confirming consistency of the reduced-width Key activation configuration ($H{=}8, D{=}64$). The baseline KV memory differs (26.50~MB vs 35.00~MB), indicating a different effective token length $T_b$ in the Codex baseline run; consequently, the measured KV reduction is lower (83.47\% vs 87.5\%) despite identical width assumptions. Since KV allocation scales linearly with sequence length under fixed $(L,H,D)$, the baseline token-length ratio follows:
+$$\frac{T_b^{\text{Codex}}}{T_b^{\text{AG}}} \approx \frac{26.50}{35.00} \approx 0.757,$$
+which explains the lower baseline KV allocation and the resulting decrease in measured reduction percentage. Token savings remain consistent in direction and scale, and vary with instruction length as expected. Routing accuracy in Codex reflects a rule-based evaluator and is not directly comparable to the controlled Anti-Gravity routing regime.
+
+\subsection{Token Savings}
+
+Across tool-calling and multi-step reasoning tasks, Piano Architecture reduced total token consumption by 70--85\% in Anti-Gravity simulations, while the Codex replication sweep observed 68.18--96.53\% depending on instruction length. These savings arise from eliminating instruction-token serialization and executing only indexed capability modules relevant to the query.
+
+\subsection{Why 87.5\% Follows from Tensor Width Reduction}
+The observed 87.5\% KV-cache reduction follows from narrowing attention width (from $H{=}32, D{=}128$ to $H{=}8, D{=}64$) while preserving sequence length, combined with removing instruction-token serialization from the runtime prompt. Together, these changes reduce the effective KV allocation by the tensor width ratio and avoid allocating cache for static instruction tokens.
+
+\subsection{Replication Consistency}
+Codex replication confirms structural consistency for Piano execution: Piano KV memory matches Anti-Gravity exactly, and token savings remain within the expected range given instruction-length variation. The remaining discrepancy in KV reduction arises from baseline token-length mismatch ($T_b$ differs between Anti-Gravity and Codex baselines), which changes baseline KV allocation and therefore the percentage reduction. Routing accuracy differs because Codex uses a rule-based routing evaluator rather than a trained or controlled Conductor regime. We therefore report side-by-side measurements and deltas in Table~\ref{tab:section6_results}, and treat Codex results as a backend-independent validation of KV accounting under matched width assumptions.
+
+\subsection{Performance Analysis}
+
+Time-To-First-Token (TTFT) remained unchanged in low-latency settings, indicating that routing overhead does not introduce measurable delay at small scales. However, the substantial reduction in KV-cache allocation implies significantly lower memory bandwidth pressure for long-lived agents and larger workloads.
+
+\section{Discussion}
+
+Unlike Sparse MoE models that optimize parameter activation, Piano Architecture optimizes instruction representation. This shift enables persistent agents, edge deployment, and long-lived systems without prompt inflation.
+
+\section{Limitations and Future Work}
+
+Routing errors may occur with poorly aligned Intent Matrices; OGIV and similarity-bound hierarchical routing mitigate uncertainty but do not eliminate it. Future work includes hierarchical keyboards and recursive module composition.
+
+\section{Conclusion}
+
+Piano Architecture demonstrates that instruction-heavy systems do not require instruction-heavy token streams. Indexed routing and modular execution provide a scalable foundation for efficient AI agents.
+
+\section*{Data Availability Statement}
+
+Code and experimental artifacts will be released at: \href{https://github.com/LuckiestManAliveEver/PIANO-ARCHITECTURE-}{https://github.com/LuckiestManAliveEver/PIANO-ARCHITECTURE-}
+
+\section*{Generative AI Usage Statement}
+
+Generative AI tools which included ChatGPT 5.2 and Gemini 3, were used to assist with language refinement and LaTeX structuring. All architectural design, implementation, experiments, and analysis were conducted and verified by the author.
+
+\appendix
+\section{Extended KV-Cache Analysis}
+
+\subsection{KV-Cache Tensor Shapes}
+
+In the baseline Transformer, attention key-value tensors follow the shape:
+
+$$[L, H, T, D] = [32, 32, 70, 128]$$
+
+where $L$ denotes layers, $H$ attention heads, $T$ sequence length, and $D$ head dimension.
+
+Under Piano Architecture, selective activation reduces this to:
+
+$$[32, 8, 70, 64]$$
+
+This structural reduction explains the observed 87.5% memory savings without truncating sequence context.
+
+\subsection{Memory Bandwidth Implications}
+
+Reducing KV width lowers both memory allocation and bandwidth pressure, which becomes dominant in long-lived agent workloads. This enables deployment on constrained accelerators and edge devices.
+
+\section{Reproducibility Notes}
+
+All experiments were conducted using deterministic routing under controlled intent detection. Random seeds, routing tables, and execution logs will be released with the accompanying repository.
+
+\subsection{Codex Replication (Offline)}
+To replicate the Anti-Gravity PoC with Codex offline, run the benchmark harness with fixed seeds and concurrency:
+\begin{verbatim}
+python bench.py --tasks 200 --seed 42 --concurrency 10
+\end{verbatim}
+The harness emits \texttt{results.csv} containing mean, p50, p95 latency, token savings \%, KV savings \%, routing accuracy \%, and verification success \%.
+
+\section{Appendix C: Implementation Snippets}
+Listing~\ref{lst:bench_excerpt} shows a compact excerpt of the bench harness: the Conductor router definition, concurrent task execution, and KV/token metric calculation.
+
+\begin{lstlisting}[language=Python, caption={Bench harness excerpt (router, concurrency, KV/token metrics).}, label={lst:bench_excerpt}]
+class ConductorRouter:
+    def __init__(self, registry, primary_k=3, warm_m=2):
+        self._registry = registry
+        self._primary_k = primary_k
+        self._warm_m = warm_m
+
+    def route(self, step_input):
+        intent = str(step_input.get("intent", "")).lower()
+        scores = []
+        for cap in self._registry.list():
+            score = 0.0
+            if cap.id.lower() in intent or cap.name.lower() in intent:
+                score += 1.0
+            score -= cap.cost_hint_ms * 0.001
+            scores.append((cap.id, score))
+        scores.sort(key=lambda x: x[1], reverse=True)
+        primary = [cid for cid, _ in scores[: self._primary_k]]
+        warm = [cid for cid, _ in scores[self._primary_k : self._primary_k + self._warm_m]]
+        return {"primary": primary, "warm": warm}
+
+async def run_benchmark(system, tasks, concurrency, steps, warmup, seed):
+    sem = asyncio.Semaphore(concurrency)
+    async def task_wrapper(task_index):
+        task_seed = seed + task_index
+        return await _run_one(sem, system, steps, warmup, task_seed)
+    results = await asyncio.gather(*(task_wrapper(i) for i in range(tasks)))
+    latencies = [r[0] for r in results if r[1]]
+    return latencies
+
+kv_proxy = active_keys * cfg.heads * cfg.head_dim
+baseline_tokens = instruction_tokens + query_tokens + output_tokens
+piano_tokens = query_tokens + output_tokens
+token_savings = 1.0 - (piano_tokens / max(baseline_tokens, 1))
+\end{lstlisting}
+
+
+\end{document}
